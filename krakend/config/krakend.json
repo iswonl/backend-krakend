@@ -7,42 +7,21 @@
       "folder": "/etc/krakend/plugins/"
     },
     "endpoints": [{
-      "endpoint": "/jwt",
+      "endpoint": "/login",
+      "input_query_strings": ["*"],
       "method": "POST",
-      "backend": [{
-          "url_pattern": "/__debug/jwt",
-          "host": ["http://localhost:8080"]
-      }],
-      "extra_config": {
-          "proxy": {
-              "static": {
-                  "strategy": "always",
-                  "data": {
-                    "access_token": {
-                        "aud": "http://api.example.com",
-                        "iss": "https://krakend.io",
-                        "sub": "1234567890qwertyuio",
-                        "jti": "id",
-                        "exp": 0
-                    },
-                    "refresh_token": {
-                        "aud": "http://api.example.com",
-                        "iss": "https://krakend.io",
-                        "sub": "1234567890qwertyuio",
-                        "jti": "id",
-                        "exp": 0
-                    }
+      "backend": [
+        {
+          "url_pattern": "/__debug",
+          "host": ["http://localhost:8080"],
+          "extra_config": {
+            "plugin/http-client": {
+              "name": "auth-token",
+                "auth-token": {
+                  "path": "/__debug"
                 }
               }
-          }
-        }
-      },{
-        "endpoint": "/token",
-        "method": "POST",
-        "backend": [
-          {
-            "url_pattern": "/jwt",
-            "host": ["http://localhost:8080"]
+            }
           }
         ],
         "extra_config": {
@@ -132,5 +111,19 @@
         "host": ["http://backend:8000"]
       }
     ]
+  },{
+    "endpoint": "/test",
+    "backend": [{
+      "url_pattern": "/login",
+      "host": ["http://localhost:8080"],
+      "method": "POST",
+      "extra_config": {
+        "modifier/lua-backend": {
+          "pre": "print(a);a=3;",
+          "live": false,
+          "allow_open_libs": true
+        }
+      }
+    }]
   }]
 }
